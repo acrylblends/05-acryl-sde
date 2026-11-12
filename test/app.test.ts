@@ -43,7 +43,7 @@ test('GET /about renders the JSX page', () =>
     assert.match(response.headers.get('content-type') ?? '', /html/)
     assert.match(
       await response.text(),
-      /<main><h1>About<\/h1><p>ACRYL ADE, the Agent Development Environment: the ACRYL IDE as a Blend\.<\/p><\/main>/,
+      /<main><h1>About<\/h1><p>ACRYL SDE, the Synthetic Data Engine, on ACRYL ADE\. Its review pages are at \/sde\.<\/p><\/main>/,
     )
   }))
 

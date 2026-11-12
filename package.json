@@ -1,5 +1,5 @@
 {
-  "name": "acryl-ade",
+  "name": "acryl-sde",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -26,7 +26,8 @@
     "prestart": "node scripts/check-node.cjs",
     "pretest": "node scripts/check-node.cjs",
     "precheck": "node scripts/check-node.cjs",
-    "predesktop": "node scripts/ade-root.mjs"
+    "predesktop": "node scripts/ade-root.mjs",
+    "sde": "node --import ./plugins/acryl-node-server/src/register.ts plugins/sde/cli.ts"
   },
   "dependencies": {
     "@acrylblends/app-context": "^0.1.0",

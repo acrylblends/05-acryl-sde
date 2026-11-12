@@ -3,11 +3,11 @@
 apiVersion: blends.acryl.dev/v1alpha1
 kind: Blueprint
 metadata:
-  id: acryl.ade
-  name: "ACRYL ADE"
+  id: acryl.sde
+  name: "ACRYL SDE"
   version: 0.1.0
   category: ai
-  description: "ACRYL ADE, the Agent Development Environment: the ACRYL IDE as a Blend. Projects and git worktrees on the left, chats, terminals and coding agents as tabs, the changed files, review and files on the right."
+  description: "ACRYL SDE, the Synthetic Data Engine: point it at a codebase and get a reviewed, anonymized Training Unit for coding-model training - secrets, personal data and project names removed, architecture extracted, nothing leaves the machine without your approval. A fork of ACRYL ADE."
   license: MIT
   visibility: public
 spec:
@@ -20,6 +20,9 @@ spec:
       name: acryl-router
     - id: routes
       name: routes
+    # The Synthetic Data Engine: runs in the app's data home, review pages at /sde (/app/sde in the workbench). No network.
+    - id: sde
+      name: sde
     # Plugin folders without a row of their own (a live install with the door's `plugin add`); a folder with a row is the app's and starts by it.
     # Read-only when NODE_ENV=production.
     - id: extensions

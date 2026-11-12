@@ -1,39 +1,58 @@
-# ACRYL ADE
+# ACRYL SDE
 
-**ACRYL ADE**, the Agent Development Environment: the ACRYL IDE (<https://github.com/acryldev/acryl>) as one Blend. Registry id `acryl.ade`.
+**ACRYL SDE**, the Synthetic Data Engine. Registry id `acryl.sde`. A fork of [ACRYL ADE](https://acrylblends.github.io/blends/ai/ade)
+(`acryl.ade`, the ACRYL IDE as a Blend) with one plugin added: `plugins/sde`.
 
-It opens the IDE's workbench, ported into the Blends framework as `@acrylblends/workspace`:
+Point it at a codebase and it makes a **Training Unit**: the code with everything that identifies the project, its people and its secrets
+removed, the engineering kept, its architecture described, and reports a buyer can check. You review every unit. Only a unit you approved is
+exported, and only to a folder on this machine. The engine opens no network connection.
 
-- **left:** your projects, each with its git branches and worktrees, and the chats and terminals open on each;
-- **centre:** tabs: the agent's chat (DeepSeek Harness), terminals, files, diffs;
-- **right:** what the agent changed, the review of a turn, and the project's files.
+## The pipeline (first version)
 
-The chat is the same agent ACRYL IDE runs, with its shell, file tools and jobs. Claude Code, Codex or any other terminal agent runs in a terminal tab beside it.
+1. **Scan**: every file in the folder is listed and read as text. The project's code is never run, imported or installed. Dependencies, build output, caches, VCS folders, binaries and lock files are skipped (`plugins/sde/src/policy.ts`).
+2. **Detect**: secrets (private keys, cloud and API keys, tokens, URL passwords, assigned secrets), personal data (emails, phone numbers, IBANs), private infrastructure (private IPs, internal hosts, cloud resource ids), fingerprints (copyright and author lines), the project's own words, and risky code (eval, shell exec, TLS checks off, SQL string building). A finding keeps a masked preview, never the value.
+3. **Anonymize**: secrets become named placeholders, personal data and hosts become reserved example values (`example.com`, `192.0.2.0/24`, `+1-555-01xx`), and the project's words become neutral names in the same case, inside identifiers and file names too (`AcmeInvoiceService` becomes `HarborInvoiceService`). The engine suggests the words (from the folder, `package.json` and the git remote); you confirm them.
+4. **Architecture**: modules, imports between them, layers (controller, service, repository, ...), external dependencies and engineering patterns (retry, idempotency, events, queues, caching, transactions, auth, validation, tests, ...), from the anonymized text.
+5. **Re-check**: the output is scanned again. A unit with a secret, personal data or a project word left in it cannot be approved.
+6. **Similarity**: how much original text stayed (token shingles, Jaccard per file). Anonymization keeps structure, so this is high by design; it is a measurement, not a legal statement.
+7. **Package**: the Training Unit (below).
+8. **Review**: on the page, signed with your name and your statement that you own the code or may license it.
+9. **Export**: the unit, a `dataset.jsonl` (one line per file) and `MANIFEST.sha256`, to `<app data>/sde/exports/<run>/`.
 
-## Start
+## The Training Unit
 
-```bash
-npm create acrylblends@latest my-ade -- --from acryl.ade
-cd my-ade && npm run dev
+```
+metadata.json  task.md  context.md  architecture.json  inventory.json
+synthetic/repository/        the anonymized code
+privacy-report.json          what was removed (counts) and what is left
+security-report.json         risky code spots
+similarity-report.json       how much original text stayed
+quality-score.json           automatic signals (tests, patterns, modularity, clean output)
+provenance.json              source hash, steps, sourceExecuted: false, network: false
+license.json                 detected licences, cleared for commercial use only on approval
+review.json  consent.json    your decision and your rights statement
 ```
 
-The first screen asks for a model key (Settings > Models). Add a project with the `+` next to Projects.
+The run's `private/` folder holds the source path, the project words and the original-to-replacement mapping. It is never packaged or exported.
 
-## How it is made
+## Use it
 
-ACRYL ADE is an ordinary Blend: `blend.yaml`, `src/`, `plugins/`, tests. The one difference from the blank app is its frame layer,
-`cordis.patch.yml`: where every other Blend mounts the Blends frame (`@acrylblends/blends-frame`) at the page's root, ACRYL ADE mounts the
-IDE's workbench (`@acrylblends/workspace`). The app's own pages still answer under `/app` (`/app/about`), and the agent can grow the app with
-plugins like in every Blend.
+```bash
+npm create acrylblends@latest my-sde -- --from acryl.sde
+cd my-sde && npm run dev          # the workbench; open /app/sde
+npm start                         # the engine's pages alone, at /sde
+npm run sde -- suggest /path/to/project
+npm run sde -- scan /path/to/project --term Acme --term Contoso
+npm run sde -- list
+```
 
-## Commands
+Approving and exporting are only on the page, by a person.
 
-- `npm run dev`: the workbench, with the agent.
-- `npm test`, `npm run check`: the app's tests and type checks.
+## Next (from the plan)
 
-## Forks
-
-[ACRYL SDE](https://acrylblends.github.io/blends/ai/sde) (`acryl.sde`), the Synthetic Data Engine, is ACRYL ADE plus a pipeline that turns a
-codebase into anonymized, reviewed training-data packages.
+- Synthetic generation: re-implement the extracted architecture in another domain or language with a model, so the output is new code, not rewritten code; validate it builds and its tests pass in a sandbox.
+- Syntax-tree parsing (Tree-sitter) instead of import patterns; embedding similarity.
+- Coding-agent session traces as a second source (the ACRYL IDE records them).
+- Delivery to prepared infrastructure (a dataset store per buyer), always behind the same approval.
 
 MIT licence.

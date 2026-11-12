@@ -12,7 +12,7 @@ const runtimeDir = join(
   'browser',
 )
 
-export const APP_NAME = 'acryl-ade'
+export const APP_NAME = 'acryl-sde'
 
 /**
  * The only place the app's mount prefix is named: the root on its own server (`npm start`), `/app` when the ACRYL frame hosts it (`npm run dev`). Every
